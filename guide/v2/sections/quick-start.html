@@ -48,7 +48,9 @@
     const makeupApp = new window.Makeup({
         colors: [
             { code: "01", color: "#000000" },
-            { code: "02", color: "#4B0082" }
+            { code: "02", color: "#4B0082" },
+            // استفاده از URL تصویر برای استخراج خودکار رنگ
+            { code: "03", url: "https://example.com/lipstick-image.jpg" }
         ],
         pattern: "normal",
         face: "lips",
@@ -144,6 +146,69 @@
           کپی
         </button>
       </div>
+    </div>
+  </div>
+
+  <div id="color-extraction" class="step-card">
+    <h3>4. استخراج خودکار رنگ از تصاویر</h3>
+    <p>
+      یکی از ویژگی‌های جدید SDK، قابلیت استخراج خودکار رنگ از تصاویر است. با این
+      قابلیت می‌توانید:
+    </p>
+    <ul>
+      <li>به جای تعیین دستی رنگ، SDK رنگ غالب را از تصویر استخراج می‌کند</li>
+      <li>
+        اگر هر دو مقدار <code>color</code> و <code>url</code> تعیین شوند،
+        <code>color</code> اولویت دارد
+      </li>
+      <li>در صورت خطا در استخراج رنگ، از رنگ خاکستری پیش‌فرض استفاده می‌شود</li>
+    </ul>
+
+    <div class="note">
+      <p>
+        نکته مهم: تصاویر باید دسترسی CORS داشته باشند تا SDK بتواند آنها را
+        پردازش کند.
+      </p>
+    </div>
+
+    <h4>4.1. تعریف رنگ‌ها با استفاده از URL تصویر</h4>
+    <div class="code-block">
+      <pre><code id="color-extraction-code">const makeupApp = new window.Makeup({
+    colors: [
+        // تعیین مستقیم رنگ
+        { code: "01", color: "#FF0000" },
+        
+        // استخراج خودکار رنگ از تصویر
+        { code: "02", url: "https://example.com/products/lipstick-red.jpg" },
+        
+        // اولویت با color است
+        { code: "03", color: "#00FF00", url: "https://example.com/green-product.jpg" },
+        
+        // تعیین نوع آرایش برای رنگ
+        { code: "04", url: "https://example.com/eyeshadow-blue.jpg" }
+    ],
+    // سایر تنظیمات...
+});</code></pre>
+      <button class="copy-btn" data-clipboard-target="#color-extraction-code">
+        کپی
+      </button>
+    </div>
+
+    <h4>4.2. افزودن رنگ جدید از URL تصویر</h4>
+    <p>همچنین می‌توانید به صورت پویا رنگ جدیدی را از یک تصویر استخراج کنید:</p>
+    <div class="code-block">
+      <pre><code id="add-color-code">// استخراج رنگ از یک تصویر و افزودن آن به رنگ‌های موجود
+makeupApp.addColorFromImage("https://example.com/new-color.jpg", "NEW_CODE", "lips")
+    .then(extractedColor => {
+        console.log(`رنگ استخراج شده: ${extractedColor}`);
+        // اکنون می‌توانید از این رنگ استفاده کنید
+    })
+    .catch(error => {
+        console.error("خطا در استخراج رنگ:", error);
+    });</code></pre>
+      <button class="copy-btn" data-clipboard-target="#add-color-code">
+        کپی
+      </button>
     </div>
   </div>
 </section>

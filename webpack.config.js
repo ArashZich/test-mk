@@ -59,6 +59,15 @@ module.exports = (env, argv) => {
             compress: {
               dead_code: true,
               drop_debugger: true,
+              drop_console: !isDevelopment, // حذف کامل console.log در محیط production
+              pure_funcs: !isDevelopment
+                ? [
+                    "console.log",
+                    "console.info",
+                    "console.debug",
+                    "console.warn",
+                  ]
+                : [], // حذف توابع console در production
               conditionals: true,
               evaluate: true,
               booleans: true,
@@ -97,7 +106,7 @@ module.exports = (env, argv) => {
       alias: {
         "@styles": path.resolve(__dirname, "src/ui/styles"),
       },
-      extensions: [".js", ".css"], // این خط رو اضافه کنید
+      extensions: [".js", ".css"],
     },
     module: {
       rules: [
@@ -144,6 +153,14 @@ module.exports = (env, argv) => {
       }),
       new webpack.ProvidePlugin({
         Buffer: ["buffer", "Buffer"],
+      }),
+      // اضافه کردن دستورات حذف console.log و موارد مشابه در سطح پلاگین‌ها نیز
+      new webpack.DefinePlugin({
+        // تعریف متغیرهای محیطی برای کنترل لاگ‌ها
+        "process.env.NODE_ENV": JSON.stringify(
+          isDevelopment ? "development" : "production"
+        ),
+        "process.env.SHOW_LOGS": JSON.stringify(isDevelopment),
       }),
       new WebpackObfuscator(
         {
