@@ -29,8 +29,12 @@ export function initColorPicker(
       colorPicker.appendChild(colorWrapper);
 
       filteredColors.forEach((item) => {
+        // اطمینان از اینکه رنگ برای نمایش موجود است
+        // اگر رنگ تعریف نشده اما url وجود دارد، می‌توانیم از یک رنگ پیش‌فرض استفاده کنیم
+        const colorToShow = item.color || "#CCCCCC";
+
         const colorButton = createColorButton(
-          item.color,
+          colorToShow,
           item.code,
           item.url,
           changeMakeupColor
@@ -76,11 +80,19 @@ function createColorButton(color, code, url, changeMakeupColor) {
   colorButton.type = "button";
 
   if (url) {
+    // اگر url وجود دارد، تصویر را نمایش می‌دهیم
     const img = document.createElement("img");
     img.src = url;
     img.alt = `Color ${code}`;
     colorButton.appendChild(img);
+
+    // اگر رنگ هم داریم، آن را به عنوان background-color هم تنظیم می‌کنیم
+    // این باعث می‌شود اگر تصویر لود نشود، رنگ به عنوان پشتیبان نمایش داده شود
+    if (color) {
+      colorButton.style.backgroundColor = color;
+    }
   } else {
+    // اگر فقط رنگ داریم و url نداریم
     colorButton.style.backgroundColor = color;
     const codeSpan = document.createElement("span");
     codeSpan.textContent = code;

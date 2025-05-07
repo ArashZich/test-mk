@@ -29,7 +29,7 @@ import {
   toast,
   initImageUpload,
 } from "../ui";
-import { isMobileDevice, getUserIP } from "../utils";
+import { isMobileDevice, getUserIP, processColorsArray } from "../utils";
 
 import "../ui/styles/index.css";
 
@@ -71,6 +71,8 @@ class Makeup {
   constructor(options) {
     // قبل از شروع، cleanup رو صدا میزنیم
     cleanup();
+
+    // تنظیمات اولیه
     this.options = {
       showColorPicker: true, // مقدار پیش‌فرض
       colors: [],
@@ -86,7 +88,6 @@ class Makeup {
     // مقداردهی imageManager
     this.imageManager = null;
 
-    // تنظیمات اولیه
     this.status = Makeup.STATUS.INITIALIZING;
     this.isLightWarningShown = false;
     this.lightWarningElement = null;
@@ -117,54 +118,152 @@ class Makeup {
     // before after
     this.comparisonManager = null;
 
-    // اعتبارسنجی توکن و شروع
-    this.validateToken(this.token)
-      .then(
-        ({
-          isValid,
-          isPremium,
-          projectType,
-          features = null,
-          mediaFeatures = null,
-        }) => {
-          if (!isValid) {
-            throw new Error("توکن نامعتبر است.");
-          }
-          if (projectType !== "makeup") {
-            throw new Error("نوع پروژه نادرست است.");
-          }
-          this.isPremium = isPremium;
-          this.featureManager = new FeatureManager(features);
-          this.mediaFeatures = mediaFeatures;
+    // پردازش رنگ‌ها و اعتبارسنجی توکن
+    this._initialSetup()
+      .then(() => {
+        // اعتبارسنجی توکن و شروع
+        this.validateToken(this.token)
+          .then(
+            ({
+              isValid,
+              isPremium,
+              projectType,
+              features = null,
+              mediaFeatures = null,
+            }) => {
+              if (!isValid) {
+                throw new Error("توکن نامعتبر است.");
+              }
+              if (projectType !== "makeup") {
+                throw new Error("نوع پروژه نادرست است.");
+              }
+              this.isPremium = isPremium;
+              this.featureManager = new FeatureManager(features);
+              this.mediaFeatures = mediaFeatures;
 
-          // تنظیم نوع آرایش اولیه
-          this.currentMakeupType = this.options.face || "lips";
+              // تنظیم نوع آرایش اولیه
+              this.currentMakeupType = this.options.face || "lips";
 
-          // اگر نوع آرایش انتخابی مجاز نیست، از اولین نوع مجاز استفاده می‌کنیم
-          if (!this.featureManager.isFeatureEnabled(this.currentMakeupType)) {
-            const enabledFeatures = this.featureManager.getEnabledFeatures();
-            this.currentMakeupType = enabledFeatures[0] || "lips";
-          }
+              // اگر نوع آرایش انتخابی مجاز نیست، از اولین نوع مجاز استفاده می‌کنیم
+              if (
+                !this.featureManager.isFeatureEnabled(this.currentMakeupType)
+              ) {
+                const enabledFeatures =
+                  this.featureManager.getEnabledFeatures();
+                this.currentMakeupType = enabledFeatures[0] || "lips";
+              }
 
-          // تنظیم پترن اولیه بر اساس پترن‌های مجاز
-          const allowedPatterns = this.featureManager.getAllowedPatterns(
-            this.currentMakeupType
-          );
-          if (allowedPatterns && allowedPatterns.length > 0) {
-            this.options.pattern = allowedPatterns[0]; // استفاده از اولین پترن مجاز
-          }
+              // تنظیم پترن اولیه بر اساس پترن‌های مجاز
+              const allowedPatterns = this.featureManager.getAllowedPatterns(
+                this.currentMakeupType
+              );
+              if (allowedPatterns && allowedPatterns.length > 0) {
+                this.options.pattern = allowedPatterns[0]; // استفاده از اولین پترن مجاز
+              }
 
-          this.init();
-        }
-      )
+              this.init();
+            }
+          )
+          .catch((error) => {
+            this.status = Makeup.STATUS.ERROR;
+            console.error(error.message);
+            this.showErrorMessage(
+              "خطا",
+              "خطایی در دسترسی به توکن یا تنظیم پروژه رخ داده است."
+            );
+
+            if (typeof this.options.onError === "function") {
+              this.options.onError(error);
+            }
+          });
+      })
       .catch((error) => {
         this.status = Makeup.STATUS.ERROR;
-        console.error(error.message);
-        this.showErrorMessage(
-          "خطا",
-          "خطایی در دسترسی به توکن یا تنظیم پروژه رخ داده است."
-        );
+        console.error(`خطا در راه‌اندازی: ${error.message}`);
+        this.showErrorMessage("خطا در راه‌اندازی", error.message);
+
+        if (typeof this.options.onError === "function") {
+          this.options.onError(error);
+        }
       });
+  }
+
+  // این متد را به کلاس Makeup اضافه کنید:
+  async _initialSetup() {
+    // پردازش رنگ‌های ورودی
+    if (this.options.colors && Array.isArray(this.options.colors)) {
+      // پردازش رنگ‌ها با استفاده از تابع processColorsArray
+      this.options.colors = await processColorsArray(this.options.colors);
+    }
+  }
+
+  /**
+   * استخراج رنگ غالب از تصویر
+   * @param {string} imageUrl - آدرس تصویر
+   * @returns {Promise<string>} کد رنگ هگز استخراج شده
+   */
+  async extractDominantColor(imageUrl) {
+    if (!imageUrl) {
+      throw new Error("آدرس تصویر نامعتبر است");
+    }
+
+    try {
+      // استفاده از تابع استخراج رنگ از utils
+      const { extractDominantColor } = await import("../utils");
+      return await extractDominantColor(imageUrl);
+    } catch (error) {
+      console.error("خطا در استخراج رنگ از تصویر:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * افزودن رنگ جدید از طریق URL تصویر
+   * @param {string} imageUrl - آدرس تصویر
+   * @param {string} code - کد رنگ
+   * @param {string} feature - ویژگی مرتبط (اختیاری)
+   * @returns {Promise<string>} کد رنگ استخراج شده
+   */
+  async addColorFromImage(imageUrl, code, feature = null) {
+    if (!imageUrl) {
+      throw new Error("آدرس تصویر نامعتبر است");
+    }
+
+    try {
+      // استخراج رنگ از تصویر
+      const extractedColor = await this.extractDominantColor(imageUrl);
+
+      // ایجاد آبجکت رنگ جدید
+      const newColor = {
+        code: code || `C${this.options.colors.length + 1}`,
+        color: extractedColor,
+        url: imageUrl,
+      };
+
+      // اضافه کردن ویژگی اگر مشخص شده باشد
+      if (feature) {
+        newColor.feature = feature;
+      }
+
+      // اضافه کردن به آرایه رنگ‌ها
+      this.options.colors.push(newColor);
+
+      // بروز کردن color picker
+      if (this.options.showColorPicker) {
+        const { initColorPicker } = await import("../ui/colorPicker");
+        initColorPicker(
+          (color) => this.changeMakeupColor(this.currentMakeupType, color),
+          this.options.colors,
+          "armo-sdk-color-picker",
+          this.featureManager
+        );
+      }
+
+      return extractedColor;
+    } catch (error) {
+      console.error("خطا در استخراج رنگ از تصویر:", error);
+      throw error;
+    }
   }
 
   async switchMode(newMode) {
