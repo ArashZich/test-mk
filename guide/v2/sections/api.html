@@ -1,0 +1,173 @@
+<section class="api">
+  <h2>API Reference</h2>
+
+  <!-- راه‌اندازی و مقداردهی اولیه -->
+  <div class="api-section">
+    <h3>راه‌اندازی SDK</h3>
+
+    <div class="api-method">
+      <h4>سازنده (Constructor)</h4>
+      <div class="code-block">
+        <pre><code>const makeup = new window.Makeup({
+    colors: Array,              // آرایه‌ای از رنگ‌ها
+    pattern: String,           // الگوی پیش‌فرض
+    face: String,             // نوع آرایش پیش‌فرض
+    showColorPicker: Boolean,  // نمایش/عدم نمایش Color Picker
+    onReady: Function,        // callback آماده شدن
+    onError: Function         // callback خطا
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="api-method">
+      <h4>تنظیم توکن</h4>
+      <div class="code-block">
+        <pre><code>window.Makeup.setToken("YOUR_TOKEN");</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- متدهای اصلی -->
+  <div class="api-section">
+    <h3>متدهای اصلی</h3>
+
+    <div class="api-method">
+      <h4>changeMakeupType(type)</h4>
+      <p>تغییر نوع آرایش</p>
+      <table class="api-params">
+        <tr>
+          <th>پارامتر</th>
+          <th>نوع</th>
+          <th>توضیحات</th>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>String</td>
+          <td>
+            lips | eyeshadow | eyepencil | eyelashes | blush | concealer |
+            foundation | brows | eyeliner
+          </td>
+        </tr>
+      </table>
+      <div class="code-block">
+        <pre><code>makeupApp.changeMakeupType("lips");</code></pre>
+      </div>
+    </div>
+
+    <div class="api-method">
+      <h4>changeMakeupColor(type, color, code)</h4>
+      <p>تغییر رنگ آرایش</p>
+      <table class="api-params">
+        <tr>
+          <th>پارامتر</th>
+          <th>نوع</th>
+          <th>توضیحات</th>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>String</td>
+          <td>نوع آرایش</td>
+        </tr>
+        <tr>
+          <td>color</td>
+          <td>String</td>
+          <td>کد رنگ HEX</td>
+        </tr>
+        <tr>
+          <td>code</td>
+          <td>String</td>
+          <td>کد شناسایی رنگ (اختیاری)</td>
+        </tr>
+      </table>
+      <div class="code-block">
+        <pre><code>makeupApp.changeMakeupColor("lips", "#FF0000", "L01");</code></pre>
+      </div>
+    </div>
+
+    <div class="api-method">
+      <h4>setMakeupPattern(type, pattern)</h4>
+      <p>تنظیم الگوی آرایش</p>
+      <table class="api-params">
+        <tr>
+          <th>پارامتر</th>
+          <th>نوع</th>
+          <th>توضیحات</th>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>String</td>
+          <td>نوع آرایش</td>
+        </tr>
+        <tr>
+          <td>pattern</td>
+          <td>String</td>
+          <td>
+            normal | matte | glossy | glitter (برای رژ لب)<br />
+            normal | lashed (برای خط چشم)
+          </td>
+        </tr>
+      </table>
+      <div class="code-block">
+        <pre><code>// مثال برای رژ لب
+makeupApp.setMakeupPattern("lips", "matte");
+
+// مثال برای خط چشم
+makeupApp.setMakeupPattern("eyeliner", "lashed");</code></pre>
+      </div>
+    </div>
+
+    <div class="api-method">
+      <h4>setMakeupTransparency(type, value)</h4>
+      <p>تنظیم شفافیت آرایش</p>
+      <table class="api-params">
+        <tr>
+          <th>پارامتر</th>
+          <th>نوع</th>
+          <th>توضیحات</th>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>String</td>
+          <td>نوع آرایش</td>
+        </tr>
+        <tr>
+          <td>value</td>
+          <td>Number</td>
+          <td>مقدار شفافیت (0 تا 1)</td>
+        </tr>
+      </table>
+      <div class="code-block">
+        <pre><code>makeupApp.setMakeupTransparency("lips", 0.5);</code></pre>
+      </div>
+    </div>
+
+    <div class="api-method">
+      <h4>getStatus()</h4>
+      <p>دریافت وضعیت فعلی SDK</p>
+      <div class="code-block">
+        <pre><code>const status = makeupApp.getStatus();
+// مقادیر ممکن: initializing, loading, ready, error</code></pre>
+      </div>
+    </div>
+
+    <div class="api-method">
+      <h4>getTechnicalInfo()</h4>
+      <p>دریافت اطلاعات فنی SDK</p>
+      <div class="code-block">
+        <pre><code>const info = makeupApp.getTechnicalInfo();
+/*
+{
+  version: "v2.0.0", // نسخه SDK
+  status: "ready", // وضعیت فعلی SDK
+  currentMakeupType: "lips", // نوع آرایش فعلی
+  isPremium: false, // وضعیت اکانت
+  enabledFeatures: ["lips", "eyeshadow"], // ویژگی‌های فعال
+  browser: { // اطلاعات مرورگر
+    userAgent: "Mozilla/5.0 ...",
+    isMobile: false
+  }
+*/</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
