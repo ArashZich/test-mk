@@ -171,12 +171,12 @@ function drawConcealerLayer(
     canvasCtx.fillStyle = baseGradient;
     canvasCtx.fill();
 
-    canvasCtx.globalCompositeOperation = "overlay";
-    canvasCtx.globalAlpha = 0.12;
-    canvasCtx.fill();
+    // canvasCtx.globalCompositeOperation = "overlay"; // تغییر دادیم
+    // canvasCtx.globalAlpha = 0.12; // تغییر دادیم
+    // canvasCtx.fill();
 
     // لایه محو کننده اضافی
-    const extraEdgeGradient = canvasCtx.createRadialGradient(
+    let extraEdgeGradient = canvasCtx.createRadialGradient(
       centerPoint.x,
       centerPoint.y,
       baseRadius * 0.3,
@@ -185,13 +185,34 @@ function drawConcealerLayer(
       baseRadius * 2.8
     );
 
-    extraEdgeGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
-    extraEdgeGradient.addColorStop(0.4, "rgba(0, 0, 0, 0.01)");
-    extraEdgeGradient.addColorStop(0.6, "rgba(0, 0, 0, 0.02)");
-    extraEdgeGradient.addColorStop(0.8, "rgba(0, 0, 0, 0.03)");
-    extraEdgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.05)");
+    // تغییرات در لایه محو کننده
+    if (false) {
+      // میتونید این رو true کنید و نتیجه رو تست کنید
+      extraEdgeGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+      extraEdgeGradient.addColorStop(0.4, "rgba(0, 0, 0, 0.01)");
+      extraEdgeGradient.addColorStop(0.6, "rgba(0, 0, 0, 0.02)");
+      extraEdgeGradient.addColorStop(0.8, "rgba(0, 0, 0, 0.03)");
+      extraEdgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.05)");
 
-    canvasCtx.globalCompositeOperation = "destination-out";
+      canvasCtx.globalCompositeOperation = "destination-out";
+      canvasCtx.fillStyle = extraEdgeGradient;
+      canvasCtx.globalAlpha = 0.8;
+      canvasCtx.fill();
+    } else {
+      extraEdgeGradient = canvasCtx.createRadialGradient(
+        centerPoint.x,
+        centerPoint.y,
+        baseRadius * 0.1,
+        centerPoint.x,
+        centerPoint.y,
+        baseRadius * 3.5
+      );
+      extraEdgeGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+      extraEdgeGradient.addColorStop(0.5, "rgba(0, 0, 0, 0.02)");
+      extraEdgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.1)");
+    }
+
+    canvasCtx.globalCompositeOperation = "destination-out"; // یا "soft-light"
     canvasCtx.fillStyle = extraEdgeGradient;
     canvasCtx.globalAlpha = 0.8;
     canvasCtx.fill();
@@ -226,7 +247,7 @@ function drawConcealerLayer(
     );
     baseGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
 
-    canvasCtx.globalCompositeOperation = "source-over";
+    canvasCtx.globalCompositeOperation = "soft-light"; // تغییر دادیم
     canvasCtx.fillStyle = baseGradient;
     canvasCtx.fill();
 
@@ -255,13 +276,13 @@ function drawConcealerLayer(
     edgeGradient.addColorStop(0.6, "rgba(0, 0, 0, 0.03)");
     edgeGradient.addColorStop(0.8, "rgba(0, 0, 0, 0.04)");
     edgeGradient.addColorStop(0.9, "rgba(0, 0, 0, 0.05)");
-    edgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
-    canvasCtx.globalAlpha = 0.5;
+    edgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.1)"); // تغییر دادیم
+    canvasCtx.globalAlpha = 0.6; // تغییر دادیم
   } else {
     edgeGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
     edgeGradient.addColorStop(0.3, "rgba(0, 0, 0, 0.05)");
     edgeGradient.addColorStop(0.5, "rgba(0, 0, 0, 0.1)");
-    edgeGradient.addColorStop(0.7, "rgba(0, 0, 0, 0.2)");
+    edgeGradient.addColorStop(0.7, "rgba(0, 0, 0, 0.25)"); // تغییر دادیم
     edgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.4)");
     canvasCtx.globalAlpha = 0.8;
   }
